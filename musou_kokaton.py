@@ -401,8 +401,11 @@ class DethBall(pg.sprite.Sprite):
         rad = 100
         self.image = pg.Surface((2*rad, 2*rad))
         color = self.image.fill("white")
+        
+        # 白を消す処理を入れる
         self.image.set_alpha(127)
         pg.draw.circle(self.image,"purple", (rad, rad), rad)
+        self.image.set_colorkey("white")
         self.vx = math.cos(math.radians(angle))
         self.vy = -math.sin(math.radians(angle))
         self.rect = self.image.get_rect()
