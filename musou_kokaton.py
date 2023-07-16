@@ -367,10 +367,13 @@ class FrontKoukaShield(pg.sprite.Sprite):
 class BackKoukaShield(pg.sprite.Sprite):
     """
     こうかとんの後ろに防御壁を作るクラス
-    引数1 bird 防御壁
-    引数2 life 防御壁の発動秒数
     """
+
     def __init__(self, bird: Bird, life: int):
+        """
+        引数1 bird 防御壁
+        引数2 life 防御壁の発動秒数
+        """
         super().__init__()
         self.vx, self.vy = bird.get_direction()
         self.life = life
@@ -393,8 +396,16 @@ class BackKoukaShield(pg.sprite.Sprite):
         if self.life < 0:
             self.kill()
 
-class DethBall(pg.sprite.Sprite):
+
+class KoukaBall(pg.sprite.Sprite):
+    """
+    こうかとんがこうかボールを放てるようにするクラス
+    """
     def __init__(self, bird: Bird):
+        """
+        こうかボールを描画する
+        引数1 bird こうかボールを放つこうかとん
+        """
         super().__init__()
         self.vx, self.vy = bird.get_direction()
         angle = math.degrees(math.atan2(-self.vy, self.vx))
@@ -403,7 +414,7 @@ class DethBall(pg.sprite.Sprite):
         color = self.image.fill("white")
         
         # 白を消す処理を入れる
-        self.image.set_alpha(127)
+        self.image.set_alpha(200)
         pg.draw.circle(self.image,"purple", (rad, rad), rad)
         self.image.set_colorkey("white")
         self.vx = math.cos(math.radians(angle))
@@ -421,6 +432,8 @@ class DethBall(pg.sprite.Sprite):
         self.rect.move_ip(+self.speed*self.vx, +self.speed*self.vy)
         if check_bound(self.rect) != (True, True):
             self.kill()
+
+
 class GoldenKoukaton(pg.sprite.Sprite):
     """
     こうかとんをゴールデンこうかとんに変身させるクラス
@@ -457,14 +470,14 @@ def main():
     neogrs = pg.sprite.Group()
     gravities = pg.sprite.Group()
 
-    score.score = 20000
+    score.score = 0
 
     shields = pg.sprite.Group()
     
     FrontKS = pg.sprite.Group()
     BackKS = pg.sprite.Group()
     GolKk = pg.sprite.Group()
-    Db = pg.sprite.Group()
+    Kkball = pg.sprite.Group()
     tmr = 0
     clock = pg.time.Clock()
     while True:
@@ -507,9 +520,9 @@ def main():
                 GolKk.add(GoldenKoukaton(bird, 500))
                 score.score -= 50
                 if event.type == pg.KEYDOWN and event.key == pg.K_d:
-                    Db.add(DethBall(bird))
+                    Kkball.add(KoukaBall(bird))
             if event.type == pg.KEYDOWN and event.key == pg.K_d and score.score > 70:
-                Db.add(DethBall(bird))
+                Kkball.add(KoukaBall(bird))
                 score.score -= 70
         screen.blit(bg_img, [0, 0])
 
@@ -566,10 +579,10 @@ def main():
             exps.add(Explosion(bomb, 50))  # 爆発エフェクト
             score.score_up(1)  # 1点アップ
 
-        for emy in pg.sprite.groupcollide(emys, Db, True, False).keys():
+        for emy in pg.sprite.groupcollide(emys, Kkball, True, False).keys():
             exps.add(Explosion(emy, 50))
             score.score_up(10)
-        for bomb in pg.sprite.groupcollide(bombs, Db, True, False).keys():
+        for bomb in pg.sprite.groupcollide(bombs, Kkball, True, False).keys():
             exps.add(Explosion(bomb, 50))
             score.score_up(1)
         
@@ -613,8 +626,8 @@ def main():
         BackKS.draw(screen)
         GolKk.update(bird)
         GolKk.draw(screen)
-        Db.update()
-        Db.draw(screen)
+        Kkball.update()
+        Kkball.draw(screen)
         pg.display.update()
         tmr += 1
         clock.tick(50)
