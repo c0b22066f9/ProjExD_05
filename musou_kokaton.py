@@ -444,7 +444,7 @@ class Gravity(pg.sprite.Sprite):
         self.image = pg.Surface((2*rad, 2*rad))
         pg.draw.circle(self.image, (1, 1, 1), (rad, rad), rad)
         self.rect = self.image.get_rect()
-        self.image.set_colorkey((0, 0, 0))
+        self.image.set_colorkey("black")
         self.image.set_alpha(127) #黒を透明化
         self.rect.center = bird.rect.center #self.rectがこうかとんを追う
 
@@ -463,7 +463,7 @@ class Aura(pg.sprite.Sprite):
         super().__init__()
         bird_rect = bird.rect
         self.image = pg.Surface((10, 10))
-        pg.draw.rect(self.image, ((128, 0, 128)), (0, 0, 10, 10))
+        pg.draw.rect(self.image, "purple", (0, 0, 10, 10))
         self.image.set_alpha(91) #purpleを透明化
         self.rect = self.image.get_rect()
         self.life = 35 #オーラブロックの生成個数
@@ -499,8 +499,9 @@ class BeamPlus(pg.sprite.Sprite):
         self.rect.centery = bird.rect.centery+bird.rect.height*self.vy
         self.rect.centerx = bird.rect.centerx+bird.rect.width*self.vx
         self.speed = 30 #大きさを小さくした分性能の差を無くすためにスピードを上げる
-        
+
     def update(self):
+
         """
         ビームを速度ベクトルself.vx, self.vyに基づき移動させる
         引数 screen：画面Surface
@@ -587,12 +588,12 @@ class KoukaBall(pg.sprite.Sprite):
         angle = math.degrees(math.atan2(-self.vy, self.vx))
         rad = 100
         self.image = pg.Surface((2*rad, 2*rad))
-        color = self.image.fill((255, 255, 255))
+        color = self.image.fill("white")
         
         # 白を消す処理を入れる
         self.image.set_alpha(200)
-        pg.draw.circle(self.image,((186, 85, 211)), (rad, rad), rad)
-        self.image.set_colorkey((255, 255, 255))
+        pg.draw.circle(self.image,"mediumorchid", (rad, rad), rad)
+        self.image.set_colorkey("white")
         self.vx = math.cos(math.radians(angle))
         self.vy = -math.sin(math.radians(angle))
         self.rect = self.image.get_rect()
