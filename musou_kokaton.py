@@ -415,7 +415,7 @@ class KoukaBall(pg.sprite.Sprite):
         
         # 白を消す処理を入れる
         self.image.set_alpha(200)
-        pg.draw.circle(self.image,"purple", (rad, rad), rad)
+        pg.draw.circle(self.image,"mediumorchid", (rad, rad), rad)
         self.image.set_colorkey("white")
         self.vx = math.cos(math.radians(angle))
         self.vy = -math.sin(math.radians(angle))
@@ -447,7 +447,7 @@ def main():
     neogrs = pg.sprite.Group()
     gravities = pg.sprite.Group()
 
-    score.score = 0
+    score.score = 20000
 
     shields = pg.sprite.Group()
     
