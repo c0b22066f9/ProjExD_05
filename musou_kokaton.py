@@ -433,29 +433,6 @@ class KoukaBall(pg.sprite.Sprite):
         if check_bound(self.rect) != (True, True):
             self.kill()
 
-
-class GoldenKoukaton(pg.sprite.Sprite):
-    """
-    こうかとんをゴールデンこうかとんに変身させるクラス
-    """
-    def __init__(self, bird, life):
-        super().__init__()
-        rad = 100
-        self.life = life
-        self.image = pg.Surface((2*rad, 2*rad))
-        pg.draw.circle(self.image, (1, 1, 1), (rad, rad), rad)
-        self.rect = self.image.get_rect()
-        self.image.fill("gold")
-        self.image.set_alpha(127) #透明化
-
-        self.rect.center = bird.rect.center  #self.rectがこうかとんを追う
-
-    def update(self, bird):
-        self.rect.center = bird.rect.center
-        self.life = self.life - 1
-        if self.life <= 0:
-            self.kill()
-
 def main():
     pg.display.set_caption("真！こうかとん無双")
     screen = pg.display.set_mode((WIDTH, HEIGHT))
@@ -476,7 +453,6 @@ def main():
     
     FrontKS = pg.sprite.Group()
     BackKS = pg.sprite.Group()
-    GolKk = pg.sprite.Group()
     Kkball = pg.sprite.Group()
     tmr = 0
     clock = pg.time.Clock()
@@ -515,12 +491,7 @@ def main():
                     score.score_up(-50)
                     FrontKS.add(FrontKoukaShield(bird, 400))
                     BackKS.add(BackKoukaShield(bird, 400))
-            if event.type == pg.KEYDOWN and event.key == pg.K_f and score.score > 50:
-
-                GolKk.add(GoldenKoukaton(bird, 500))
-                score.score -= 50
-                if event.type == pg.KEYDOWN and event.key == pg.K_d:
-                    Kkball.add(KoukaBall(bird))
+          
             if event.type == pg.KEYDOWN and event.key == pg.K_d and score.score > 70:
                 Kkball.add(KoukaBall(bird))
                 score.score -= 70
@@ -624,8 +595,6 @@ def main():
         FrontKS.draw(screen)
         BackKS.update(bird)
         BackKS.draw(screen)
-        GolKk.update(bird)
-        GolKk.draw(screen)
         Kkball.update()
         Kkball.draw(screen)
         pg.display.update()
