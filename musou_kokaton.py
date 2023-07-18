@@ -83,7 +83,7 @@ class Bird(pg.sprite.Sprite):
         引数2 xy：こうかとん画像の位置座標タプル
         """
         super().__init__()
-        img0 = pg.transform.rotozoom(pg.image.load(f"fig/{num}.png"), 0, 2.0)
+        img0 = pg.transform.rotozoom(pg.image.load(f"ex05/fig/{num}.png"), 0, 2.0)
         img = pg.transform.flip(img0, True, False)  # デフォルトのこうかとん
         self.imgs = {
             (+1, 0): img,  # 右
@@ -109,7 +109,7 @@ class Bird(pg.sprite.Sprite):
         引数2 screen：画面Surface
         """
 
-        self.image = pg.transform.rotozoom(pg.image.load(f"fig/{num}.png"), 10, 2.0)
+        self.image = pg.transform.rotozoom(pg.image.load(f"ex05/fig/{num}.png"), 10, 2.0)
 
         
         screen.blit(self.image, self.rect)
@@ -174,7 +174,7 @@ class Small_Bird(pg.sprite.Sprite):
         引数2 xy：こうかとん画像の位置座標タプル
         """
         super().__init__()
-        img10 = pg.transform.rotozoom(pg.image.load(f"fig/{num}.png"), 0, 2.0)
+        img10 = pg.transform.rotozoom(pg.image.load(f"ex05/fig/{num}.png"), 0, 2.0)
         img10 = pg.transform.scale(img10, (70, 70))
         img = pg.transform.flip(img10, True, False)  # デフォルトのこうかとん
         self.imgs = {
@@ -344,7 +344,7 @@ class Enemy(pg.sprite.Sprite):
     """
     敵機に関するクラス
     """
-    imgs = [pg.image.load(f"fig/alien{i}.png") for i in range(1, 4)]
+    imgs = [pg.image.load(f"ex05/fig/alien{i}.png") for i in range(1, 4)]
     
     def __init__(self):
         super().__init__()
@@ -499,6 +499,15 @@ class BeamPlus(pg.sprite.Sprite):
         self.rect.centery = bird.rect.centery+bird.rect.height*self.vy
         self.rect.centerx = bird.rect.centerx+bird.rect.width*self.vx
         self.speed = 30 #大きさを小さくした分性能の差を無くすためにスピードを上げる
+        
+        def update(self):
+            """
+            ビームを速度ベクトルself.vx, self.vyに基づき移動させる
+            引数 screen：画面Surface
+            """
+            self.rect.move_ip(+self.speed*self.vx, +self.speed*self.vy)
+            if check_bound(self.rect) != (True, True):
+                self.kill()
 
 class FrontKoukaShield(pg.sprite.Sprite):
     """
@@ -650,7 +659,7 @@ class Levelup:
 def main():
     pg.display.set_caption("真！こうかとん無双")
     screen = pg.display.set_mode((WIDTH, HEIGHT))
-    bg_img = pg.image.load("fig/pg_bg.jpg")
+    bg_img = pg.image.load("ex05/fig/pg_bg.jpg")
     score = Score()
 
     start_screen(screen)
