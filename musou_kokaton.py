@@ -12,6 +12,32 @@ from pygame.sprite import AbstractGroup
 WIDTH = 1600  # ゲームウィンドウの幅
 HEIGHT = 900  # ゲームウィンドウの高さ
 
+def start_screen(screen):
+    """
+    スタート画面を表示する
+    引数1 screen: 画面Surface
+    """
+    bg_img = pg.image.load("ex05/fig/pg_bg.jpg")
+    font_title = pg.font.Font(None, 150)
+    text_title = font_title.render("SHOOTING GAME", True, (0, 0, 0))
+    text_title_rect = text_title.get_rect(center=(WIDTH // 2, HEIGHT // 2 - 40))
+
+    font = pg.font.Font(None, 80)
+    text = font.render("Press SPACE BAR to start.", True, (0, 0, 0))
+    text_rect = text.get_rect(center=(WIDTH // 2, HEIGHT // 2 + 90))
+
+    screen.blit(bg_img, (0, 0))
+    screen.blit(text_title, text_title_rect)  # タイトルを表示する
+    screen.blit(text, text_rect)  # 操作方法を表示する
+    pg.display.flip()
+
+    while True:
+        for event in pg.event.get():
+            if event.type == pg.QUIT:
+                pg.quit()
+                sys.exit()
+            elif event.type == pg.KEYDOWN and event.key == pg.K_SPACE:
+                return
 
 def check_bound(obj: pg.Rect) -> tuple[bool, bool]:
     """
@@ -626,6 +652,8 @@ def main():
     screen = pg.display.set_mode((WIDTH, HEIGHT))
     bg_img = pg.image.load("fig/pg_bg.jpg")
     score = Score()
+
+    start_screen(screen)
 
     bird = Bird(3, (900, 400))
     s_bird = Small_Bird(3, (800, 300))
