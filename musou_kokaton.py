@@ -500,14 +500,14 @@ class BeamPlus(pg.sprite.Sprite):
         self.rect.centerx = bird.rect.centerx+bird.rect.width*self.vx
         self.speed = 30 #大きさを小さくした分性能の差を無くすためにスピードを上げる
         
-        def update(self):
-            """
-            ビームを速度ベクトルself.vx, self.vyに基づき移動させる
-            引数 screen：画面Surface
-            """
-            self.rect.move_ip(+self.speed*self.vx, +self.speed*self.vy)
-            if check_bound(self.rect) != (True, True):
-                self.kill()
+    def update(self):
+        """
+        ビームを速度ベクトルself.vx, self.vyに基づき移動させる
+        引数 screen：画面Surface
+        """
+        self.rect.move_ip(+self.speed*self.vx, +self.speed*self.vy)
+        if check_bound(self.rect) != (True, True):
+            self.kill()
 
 class FrontKoukaShield(pg.sprite.Sprite):
     """
