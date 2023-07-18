@@ -80,7 +80,7 @@ class Bird(pg.sprite.Sprite):
         引数1 num：こうかとん画像ファイル名の番号
         引数2 screen：画面Surface
         """
-        self.image = pg.transform.rotozoom(pg.image.load(f"fig/{num}.png"), 0, 2.0)
+        self.image = pg.transform.rotozoom(pg.image.load(f"ex05/fig/{num}.png"), 0, 2.0)
         screen.blit(self.image, self.rect)
 
     def update(self, key_lst: list[bool], screen: pg.Surface):
@@ -165,21 +165,22 @@ class Beam(pg.sprite.Sprite):
     """
     ビームに関するクラス
     """
-    def __init__(self, bird: Bird):
+    def __init__(self, bird: Bird, angle_a: float=0):
         """
         ビーム画像Surfaceを生成する
         引数 bird：ビームを放つこうかとん
         """
         super().__init__()
         self.vx, self.vy = bird.get_direction()
-        angle = math.degrees(math.atan2(-self.vy, self.vx))
-        self.image = pg.transform.rotozoom(pg.image.load(f"fig/beam.png"), angle, 2.0)
+        angle = math.degrees(math.atan2(-self.vy, self.vx))+angle_a
+        self.size = random.uniform(1.5, 3.0)
+        self.image = pg.transform.rotozoom(pg.image.load(f"ex05/fig/beam.png"), angle, self.size)
         self.vx = math.cos(math.radians(angle))
         self.vy = -math.sin(math.radians(angle))
         self.rect = self.image.get_rect()
         self.rect.centery = bird.rect.centery+bird.rect.height*self.vy
         self.rect.centerx = bird.rect.centerx+bird.rect.width*self.vx
-        self.speed = 10
+        self.speed = random.uniform(5, 20) #ビームのスピードをランダムに変更
 
     def update(self):
         """
@@ -202,7 +203,7 @@ class Explosion(pg.sprite.Sprite):
         引数2 life：爆発時間
         """
         super().__init__()
-        img = pg.image.load("fig/explosion.gif")
+        img = pg.image.load("ex05/fig/explosion.gif")
         self.imgs = [img, pg.transform.flip(img, 1, 1)]
         self.image = self.imgs[0]
         self.rect = self.image.get_rect(center=obj.rect.center)
@@ -334,7 +335,85 @@ class Gravity(pg.sprite.Sprite):
         if self.life <= 0:
             self.kill()
         
+class BeamPlus(pg.sprite.Sprite):
+    """
+    2発のビームの発射を可能にするクラス
+    """
+    def __init__(self, bird: Bird):
+        """
+        ビーム画像Surfaceを生成する
+        引数 bird：ビームを放つこうかとん
+        """
+        super().__init__()
+        self.vx, self.vy = bird.get_direction()
+        angle = math.degrees(math.atan2(-self.vy, self.vx))
+        self.image = pg.Surface((bird.rect.height/2, 20))
+        self.size = random.uniform(0.1, 1.0) #ビームの区別をつけるため小さくしている
+        self.image = pg.transform.rotozoom(self.image, angle, self.size)
+        pg.draw.rect(self.image, (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255)), pg.Rect(0, 0, bird.rect.height/2, 20))
+        self.vx = math.cos(math.radians(angle))
+        self.vy = -math.sin(math.radians(angle))
+        self.rect = self.image.get_rect()
+        self.rect.centery = bird.rect.centery+bird.rect.height*self.vy
+        self.rect.centerx = bird.rect.centerx+bird.rect.width*self.vx
+        self.speed = 30 #大きさを小さくした分性能の差を無くすためにスピードを上げる
 
+    def update(self):
+        """
+        ビームを速度ベクトルself.vx, self.vyに基づき移動させる
+        引数 screen：画面Surface
+        """
+        self.rect.move_ip(+self.speed*self.vx, +self.speed*self.vy)
+        if check_bound(self.rect) != (True, True):
+            self.kill()
+            
+            
+class Beamplusalpha:
+    """
+    全方向に速度が不一定のビームを放つ処理
+    """
+    def __init__(self, bird: Bird,num: int):
+        """
+        ビーム画像Surfaceを生成する
+        引数 bird：ビームを放つこうかとん
+        引数 num：発射するビームの数
+        bird, numの初期化を行う
+        """
+        self.beam_list = [] #リストの生成
+        self.bird = bird
+        self.num = num
+    def gen_beams(self):
+        """
+        角度をつけてビームを出す処理
+        """
+        vx, vy = self.bird.get_direction()
+        for i in range(-180, 181,int(100/(self.num-1))): #-180度から180度の間でint(100/(self.num-1))おきにビームをランダムの速さで発射
+            self.beam_list.append(Beam(self.bird, i)) #ビームの値をリストに代入
+        return self.beam_list
+    
+
+class Levelup:
+    def __init__(self):
+        """
+        ビームの結果に応じてレベルの上がる処理
+        """
+        self.font = pg.font.Font(None, 50)
+        self.color = (247, 146, 19)
+        self.level = 0
+        self.image = self.font.render(f"LEVEL: {self.level}", 0, self.color) #現在のレベル表示
+        self.rect = self.image.get_rect()
+        self.rect.center = WIDTH-80, 30 #self.imageの内容の表示位置
+        
+    def levelup(self, add):
+        """
+        スコア増加の処理
+        """
+        self.level += add 
+
+    def update(self, screen: pg.Surface):
+        self.image = self.font.render(f"LEVEL: {self.level}", 0, self.color)
+        screen.blit(self.image, self.rect)
+        
 def main():
     pg.display.set_caption("真！こうかとん無双")
     screen = pg.display.set_mode((WIDTH, HEIGHT))
@@ -348,8 +427,11 @@ def main():
     emys = pg.sprite.Group()
     neogrs = pg.sprite.Group()
     gravities = pg.sprite.Group()
+    pluses = pg.sprite.Group()
+    levels = Levelup()
+    levels.level = 1
 
-    score.score = 20000
+    score.score = 0
 
     shields = pg.sprite.Group()
  
@@ -363,6 +445,11 @@ def main():
                 return 0
             if event.type == pg.KEYDOWN and event.key == pg.K_SPACE:
                 beams.add(Beam(bird))
+                for i in range(1,100):
+                    if score.score >= i*10:
+                        pluses.add(BeamPlus(bird))
+                        
+        
             if event.type == pg.KEYDOWN and event.key == pg.K_LSHIFT:  # 左シフトが押されているか判定
                 bird.speed = 20  # スピードアップ
             if event.type == pg.KEYUP and event.key == pg.K_LSHIFT:  # 左シフトが押された状態から離れたら
@@ -385,6 +472,11 @@ def main():
                 if score.score > 50:
                     score.score_up(-50)
                     shields.add(Shield(bird, 400))
+                    
+            if event.type == pg.KEYDOWN and event.key == pg.K_F1 and score.score >40:
+                levels.levelup(3) #レベル3アップ
+                beams.add(Beamplusalpha(bird, 6).gen_beams())
+                score.score_up(-40)
                    
 
         screen.blit(bg_img, [0, 0])
@@ -401,6 +493,7 @@ def main():
         for emy in pg.sprite.groupcollide(emys, beams, True, True).keys():
             exps.add(Explosion(emy, 100))  # 爆発エフェクト
             score.score_up(10)  # 10点アップ
+            levels.levelup(1)   #レベル1アップ
             bird.change_img(6, screen)  # こうかとん喜びエフェクト
 
         for bomb in pg.sprite.groupcollide(bombs, beams, True, True).keys():
@@ -423,6 +516,7 @@ def main():
         for emy in pg.sprite.groupcollide(emys, gravities, True, False).keys():
             exps.add(Explosion(emy, 100))  # 爆発エフェクト
             score.score_up(10)  # 10点アップ
+            levels.levelup(1)   #レベルが1上がる
             bird.change_img(6, screen)  # こうかとん喜びエフェクト
 
         # for bomb in pg.sprite.groupcollide(bombs, gravities, True, False).keys():
@@ -444,10 +538,19 @@ def main():
             score.score_up(1)
             
         for emy in pg.sprite.groupcollide(emys, neogrs, True, False).keys():
+            exps.add(Explosion(emy, 100)) # 爆発エフェクト
+            score.score_up(10)  # 10点アップ
+            bird.change_img(6, screen)  # こうかとん喜びエフェクト
+            
+        for emy in pg.sprite.groupcollide(emys, pluses, True, True).keys():
             exps.add(Explosion(emy, 100))  # 爆発エフェクト
+            levels.levelup(1)   #レベルが1上がる
             score.score_up(10)  # 10点アップ
             bird.change_img(6, screen)  # こうかとん喜びエフェクト
 
+        for bomb in pg.sprite.groupcollide(bombs, pluses, True, True).keys():
+            exps.add(Explosion(bomb, 50))  # 爆発エフェクト
+            score.score_up(1)  # 1点アップ
 
         bird.update(key_lst, screen)
         beams.update()
@@ -466,7 +569,9 @@ def main():
 
         shields.update()
         shields.draw(screen)
-
+        pluses.update()
+        pluses.draw(screen)
+        levels.update(screen)
  
         pg.display.update()
         tmr += 1
