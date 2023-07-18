@@ -83,7 +83,7 @@ class Bird(pg.sprite.Sprite):
         引数2 xy：こうかとん画像の位置座標タプル
         """
         super().__init__()
-        img0 = pg.transform.rotozoom(pg.image.load(f"fig/{num}.png"), 0, 2.0)
+        img0 = pg.transform.rotozoom(pg.image.load(f"ex05/fig/{num}.png"), 0, 2.0)
         img = pg.transform.flip(img0, True, False)  # デフォルトのこうかとん
         self.imgs = {
             (+1, 0): img,  # 右
@@ -109,7 +109,7 @@ class Bird(pg.sprite.Sprite):
         引数2 screen：画面Surface
         """
 
-        self.image = pg.transform.rotozoom(pg.image.load(f"fig/{num}.png"), 10, 2.0)
+        self.image = pg.transform.rotozoom(pg.image.load(f"ex05/fig/{num}.png"), 10, 2.0)
 
         
         screen.blit(self.image, self.rect)
@@ -174,7 +174,7 @@ class Small_Bird(pg.sprite.Sprite):
         引数2 xy：こうかとん画像の位置座標タプル
         """
         super().__init__()
-        img10 = pg.transform.rotozoom(pg.image.load(f"fig/{num}.png"), 0, 2.0)
+        img10 = pg.transform.rotozoom(pg.image.load(f"ex05/fig/{num}.png"), 0, 2.0)
         img10 = pg.transform.scale(img10, (70, 70))
         img = pg.transform.flip(img10, True, False)  # デフォルトのこうかとん
         self.imgs = {
@@ -200,7 +200,7 @@ class Small_Bird(pg.sprite.Sprite):
         引数1 num：こうかとん画像ファイル名の番号
         引数2 screen：画面Surface
         """
-        self.image2 = pg.transform.rotozoom(pg.image.load(f"fig/{num}.png"), 10, 2.0)
+        self.image2 = pg.transform.rotozoom(pg.image.load(f"ex05/fig/{num}.png"), 10, 2.0)
         self.image2 = pg.transform.scale(self.image2, (50, 50))
         screen.blit(self.image2, self.rect)
         
@@ -344,7 +344,7 @@ class Enemy(pg.sprite.Sprite):
     """
     敵機に関するクラス
     """
-    imgs = [pg.image.load(f"fig/alien{i}.png") for i in range(1, 4)]
+    imgs = [pg.image.load(f"ex05/fig/alien{i}.png") for i in range(1, 4)]
     
     def __init__(self):
         super().__init__()
@@ -444,7 +444,7 @@ class Gravity(pg.sprite.Sprite):
         self.image = pg.Surface((2*rad, 2*rad))
         pg.draw.circle(self.image, (1, 1, 1), (rad, rad), rad)
         self.rect = self.image.get_rect()
-        self.image.set_colorkey("black")
+        self.image.set_colorkey((0, 0, 0))
         self.image.set_alpha(127) #黒を透明化
         self.rect.center = bird.rect.center #self.rectがこうかとんを追う
 
@@ -463,7 +463,7 @@ class Aura(pg.sprite.Sprite):
         super().__init__()
         bird_rect = bird.rect
         self.image = pg.Surface((10, 10))
-        pg.draw.rect(self.image, "purple", (0, 0, 10, 10))
+        pg.draw.rect(self.image, ((128, 0, 128)), (0, 0, 10, 10))
         self.image.set_alpha(91) #purpleを透明化
         self.rect = self.image.get_rect()
         self.life = 35 #オーラブロックの生成個数
@@ -578,12 +578,12 @@ class KoukaBall(pg.sprite.Sprite):
         angle = math.degrees(math.atan2(-self.vy, self.vx))
         rad = 100
         self.image = pg.Surface((2*rad, 2*rad))
-        color = self.image.fill("white")
+        color = self.image.fill((255, 255, 255))
         
         # 白を消す処理を入れる
         self.image.set_alpha(200)
-        pg.draw.circle(self.image,"mediumorchid", (rad, rad), rad)
-        self.image.set_colorkey("white")
+        pg.draw.circle(self.image,((186, 85, 211)), (rad, rad), rad)
+        self.image.set_colorkey((255, 255, 255))
         self.vx = math.cos(math.radians(angle))
         self.vy = -math.sin(math.radians(angle))
         self.rect = self.image.get_rect()
@@ -650,7 +650,7 @@ class Levelup:
 def main():
     pg.display.set_caption("真！こうかとん無双")
     screen = pg.display.set_mode((WIDTH, HEIGHT))
-    bg_img = pg.image.load("fig/pg_bg.jpg")
+    bg_img = pg.image.load("ex05/fig/pg_bg.jpg")
     score = Score()
 
     start_screen(screen)
