@@ -80,7 +80,7 @@ class Bird(pg.sprite.Sprite):
         引数1 num：こうかとん画像ファイル名の番号
         引数2 screen：画面Surface
         """
-        self.image = pg.transform.rotozoom(pg.image.load(f"fig/{num}.png"), 0, 2.0)
+        self.image = pg.transform.rotozoom(pg.image.load(f"ex05/fig/{num}.png"), 0, 2.0)
         screen.blit(self.image, self.rect)
 
     def update(self, key_lst: list[bool], screen: pg.Surface):
@@ -173,7 +173,7 @@ class Beam(pg.sprite.Sprite):
         super().__init__()
         self.vx, self.vy = bird.get_direction()
         angle = math.degrees(math.atan2(-self.vy, self.vx))
-        self.image = pg.transform.rotozoom(pg.image.load(f"fig/beam.png"), angle, 2.0)
+        self.image = pg.transform.rotozoom(pg.image.load(f"ex05/fig/beam.png"), angle, 2.0)
         self.vx = math.cos(math.radians(angle))
         self.vy = -math.sin(math.radians(angle))
         self.rect = self.image.get_rect()
@@ -202,7 +202,7 @@ class Explosion(pg.sprite.Sprite):
         引数2 life：爆発時間
         """
         super().__init__()
-        img = pg.image.load("fig/explosion.gif")
+        img = pg.image.load("ex05/fig/explosion.gif")
         self.imgs = [img, pg.transform.flip(img, 1, 1)]
         self.image = self.imgs[0]
         self.rect = self.image.get_rect(center=obj.rect.center)
@@ -326,14 +326,112 @@ class Gravity(pg.sprite.Sprite):
         self.image.set_alpha(127) #黒を透明化
         self.rect.center = bird.rect.center #self.rectがこうかとんを追う
 
-        
-
     def update(self, bird):
         self.rect.center = bird.rect.center
         self.life = self.life - 1
         if self.life <= 0:
             self.kill()
         
+
+class FrontKoukaShield(pg.sprite.Sprite):
+    """
+    こうかとんの前に防御壁を作るクラス
+    引数1 bird 防御壁
+    引数2 life 防御壁の発動秒数
+    """
+    def __init__(self, bird: Bird, life: int):
+        super().__init__()
+        self.vx, self.vy = bird.get_direction()
+        self.life = life
+        theta = math.atan2(-self.vy, self.vx) #こうかとんの向き(弧度法)
+        angle = math.degrees(theta) #こうかとんの向き(度数法)
+        self.image = pg.Surface((20, bird.rect.height * 2))
+        self.image = pg.transform.rotozoom(self.image, angle, 1.0)
+        pg.draw.rect(self.image, (255, 0, 0), pg.Rect(0, 0, 20, bird.rect.height * 2))
+        self.rect = self.image.get_rect()
+        self.rect.centerx = bird.rect.centerx + bird.rect.width*self.vx  # self.rect.centerxがこうかとんを追う
+        self.rect.centery = bird.rect.centery + bird.rect.height*self.vy  # self.rect.centeryがこうかとんを追う
+        # 爆弾を落下するemyから見た攻撃対象のbirdの方向を計算
+
+    def update(self, bird: Bird):
+        """
+        防御壁の発動秒数を１減算し、発動中はこうかとんの前に防御壁を有効化
+        """
+        self.rect.centerx = bird.rect.centerx + bird.rect.width*self.vx
+        self.rect.centery = bird.rect.centery + bird.rect.height*self.vy
+        self.life -= 1
+        if self.life < 0:
+            self.kill()
+
+
+class BackKoukaShield(pg.sprite.Sprite):
+    """
+    こうかとんの後ろに防御壁を作るクラス
+    """
+
+    def __init__(self, bird: Bird, life: int):
+        """
+        引数1 bird 防御壁
+        引数2 life 防御壁の発動秒数
+        """
+        super().__init__()
+        self.vx, self.vy = bird.get_direction()
+        self.life = life
+        rev_theta = math.atan2(-self.vy, -self.vx)
+        angle2 = math.degrees(rev_theta)
+        self.image = pg.Surface((20, bird.rect.height*2))
+        self.image = pg.transform.rotozoom(self.image, angle2, 1.0)
+        pg.draw.rect(self.image, (255, 255, 0), pg.Rect(0, 0, 20,bird.rect.height * 2))
+        self.rect = self.image.get_rect()
+        self.rect.centerx = bird.rect.centerx + bird.rect.width*(-self.vx)  # self.rect.centerxがこうかとんを追う
+        self.rect.centery = bird.rect.centery + bird.rect.height*(-self.vy)  # self.rect.centeryがこうかとんを追う
+
+    def update(self, bird: Bird):
+        """
+        防御壁の発動時間を1減算、発動中はこうかとんの後ろに防御壁を展開
+        """
+        self.rect.centerx = bird.rect.centerx + bird.rect.width*(-self.vx)
+        self.rect.centery = bird.rect.centery + bird.rect.height*(-self.vy)
+        self.life -= 1
+        if self.life < 0:
+            self.kill()
+
+
+class KoukaBall(pg.sprite.Sprite):
+    """
+    こうかとんがこうかボールを放てるようにするクラス
+    """
+    def __init__(self, bird: Bird):
+        """
+        こうかボールを描画する
+        引数1 bird こうかボールを放つこうかとん
+        """
+        super().__init__()
+        self.vx, self.vy = bird.get_direction()
+        angle = math.degrees(math.atan2(-self.vy, self.vx))
+        rad = 100
+        self.image = pg.Surface((2*rad, 2*rad))
+        color = self.image.fill("white")
+        
+        # 白を消す処理を入れる
+        self.image.set_alpha(200)
+        pg.draw.circle(self.image,"mediumorchid", (rad, rad), rad)
+        self.image.set_colorkey("white")
+        self.vx = math.cos(math.radians(angle))
+        self.vy = -math.sin(math.radians(angle))
+        self.rect = self.image.get_rect()
+        self.rect.centery = bird.rect.centery+bird.rect.height*self.vy
+        self.rect.centerx = bird.rect.centerx+bird.rect.width*self.vx
+        self.speed = 10
+
+    def update(self):
+        """
+        ビームを速度ベクトルself.vx, self.vyに基づき移動させる
+        引数 screen：画面Surface
+        """
+        self.rect.move_ip(+self.speed*self.vx, +self.speed*self.vy)
+        if check_bound(self.rect) != (True, True):
+            self.kill()
 
 def main():
     pg.display.set_caption("真！こうかとん無双")
@@ -352,8 +450,10 @@ def main():
     score.score = 20000
 
     shields = pg.sprite.Group()
- 
-
+    
+    FrontKS = pg.sprite.Group()
+    BackKS = pg.sprite.Group()
+    Kkball = pg.sprite.Group()
     tmr = 0
     clock = pg.time.Clock()
     while True:
@@ -386,7 +486,15 @@ def main():
                     score.score_up(-50)
                     shields.add(Shield(bird, 400))
                    
-
+            if event.type == pg.KEYDOWN and event.key == pg.K_x and len(FrontKS) == 0 : 
+                if score.score > 50:
+                    score.score_up(-50)
+                    FrontKS.add(FrontKoukaShield(bird, 400))
+                    BackKS.add(BackKoukaShield(bird, 400))
+          
+            if event.type == pg.KEYDOWN and event.key == pg.K_d and score.score > 70:
+                Kkball.add(KoukaBall(bird))
+                score.score -= 70
         screen.blit(bg_img, [0, 0])
 
 
@@ -432,6 +540,23 @@ def main():
             exps.add(Explosion(bomb, 50))  # 爆発エフェクト
             score.score_up(1)  # 1点アップ
 
+        for bomb in pg.sprite.groupcollide(bombs, FrontKS, True, False).keys():
+
+            exps.add(Explosion(bomb, 50))  # 爆発エフェクト
+            score.score_up(1)  # 1点アップ
+        
+        for bomb in pg.sprite.groupcollide(bombs, BackKS, True, False).keys():
+
+            exps.add(Explosion(bomb, 50))  # 爆発エフェクト
+            score.score_up(1)  # 1点アップ
+
+        for emy in pg.sprite.groupcollide(emys, Kkball, True, False).keys():
+            exps.add(Explosion(emy, 50))
+            score.score_up(10)
+        for bomb in pg.sprite.groupcollide(bombs, Kkball, True, False).keys():
+            exps.add(Explosion(bomb, 50))
+            score.score_up(1)
+        
         if len(pg.sprite.spritecollide(bird, bombs, True)) != 0:
             bird.change_img(8, screen) # こうかとん悲しみエフェクト
             score.update(screen)
@@ -441,7 +566,7 @@ def main():
         
         for bomb in pg.sprite.groupcollide(bombs, neogrs, True, False).keys():
             exps.add(Explosion(bomb, 50))  # 爆発エフェクト
-            score.score_up(1)
+            score.score_up(1)  # 1点アップ
             
         for emy in pg.sprite.groupcollide(emys, neogrs, True, False).keys():
             exps.add(Explosion(emy, 100))  # 爆発エフェクト
@@ -466,8 +591,12 @@ def main():
 
         shields.update()
         shields.draw(screen)
-
- 
+        FrontKS.update(bird)
+        FrontKS.draw(screen)
+        BackKS.update(bird)
+        BackKS.draw(screen)
+        Kkball.update()
+        Kkball.draw(screen)
         pg.display.update()
         tmr += 1
         clock.tick(50)
